@@ -117,6 +117,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 Du ska få "Du är inloggad!" som svar.
          */
+        auth.userDetailsService((s) -> null);
     }
 
 }
