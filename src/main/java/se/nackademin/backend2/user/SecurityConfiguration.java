@@ -41,6 +41,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .cors()
                 .disable()
                 .authorizeRequests()
+
                 /* TODO: uppgift 1:
                     Testa att skapa en användare genom swagger. Du får ett fel. Endpointen kan inte kommas åt för att
                     spring security har låst ner din app.
@@ -54,6 +55,9 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     200 ok! perfekt men jag får inget svar tillbaka?
                     Kolla i loggarna, vi får ett läskigt fel som vi ska se till att lösa i uppgift 2
                  */
+                // öppnar allting under /user
+                .antMatchers("/user/*").permitAll()
+                // öppnar upp alla swagger-url
                 .antMatchers("/swagger-ui/*", "/swagger-ui.html", "/webjars/**", "/v2/**", "/swagger-resources/**").permitAll()
                 /*
                 TODO: Upppgift 4:
@@ -85,6 +89,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                    Tror det är dags att leta efter uppgift 5.
                  */
+                .antMatchers("/admin/*").hasRole("ADMIN")
+                .antMatchers("/customer/*").hasRole("CUSTOMER")
                 .anyRequest().authenticated().and()
                 .addFilter(filter)
                 .addFilter(jwtAuthorizationFilter)
@@ -101,7 +107,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 låt oss se vad den gör
 
                 1. Vi deserialiserar användaren och det verkar gå bra (getPrincipal)
-                2. Vi för söker authentisera användaren med ett UsernamePasswordAuthenticationToken och där verkar det
+                2. Vi försöker authentisera användaren med ett UsernamePasswordAuthenticationToken och där verkar det
                 smälla för att authmanagern är null. Låt oss konfigurera den,
 
                 Vi behöver
@@ -117,7 +123,11 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 Du ska få "Du är inloggad!" som svar.
          */
-        auth.userDetailsService((s) -> null);
+        auth.userDetailsService((username) -> userRepo.findById(username).orElseThrow(() -> new UsernameNotFoundException(":(")))
+                .passwordEncoder(passwordEncoder); //UserDetailsService has one method --> can use as lambda);
+
     }
+
+
 
 }
